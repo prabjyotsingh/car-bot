@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CarBot - Car Spare Parts</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #0f0f0f;
+      color: #e6e6e6;
+      padding: 40px 20px;
+    }
+    h1 {
+      text-align: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 3rem;
+      color: #a5d610;
+      margin-bottom: 40px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      max-width: 1200px;
+      margin: auto;
+    }
+    .card {
+      background: #1c1c1c;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(165, 214, 16, 0.2);
+      transition: transform 0.3s;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+    .card-content {
+      padding: 15px;
+    }
+    .card h2 {
+      font-size: 1.2rem;
+      color: #a5d610;
+      margin-bottom: 10px;
+    }
+    .card p {
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+    .price {
+      color: #fff;
+      font-weight: bold;
+    }
+    footer {
+      margin-top: 60px;
+      text-align: center;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <header style="padding: 20px 30px; background: rgba(0, 0, 0, 0.6); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; box-shadow: 0 0 10px rgba(165, 214, 16, 0.3); margin-bottom: 30px;">
+    <h1 style="font-family: 'Orbitron', sans-serif; font-size: 1.8rem; color: #a5d610; margin: 0;">CarBot</h1>
+    <nav>
+      <a href="index.html" style="color: #ccc; text-decoration: none; margin-right: 15px;">Home</a>
+      <a href="dashboard.html" style="color: #ccc; text-decoration: none; margin-right: 15px;">Dashboard</a>
+      <a href="my-cars.html" style="color: #ccc; text-decoration: none; margin-right: 15px;">My Cars</a>
+      <a href="models.html" style="color: #ccc; text-decoration: none; margin-right: 15px;">AI Models</a>
+      <a href="workshop.html" style="color: #ccc; text-decoration: none; margin-right: 15px;">Workshops</a>
+      <a href="login.html" style="color: #ccc; text-decoration: none;">Login</a>
+    </nav>
+  </header>
+  <h1>🛒 Car Spare Parts</h1>
+  <div class="grid">
+    <div class="card">
+      <a href="https://www.amazon.in/s?k=car+spear+parts+all" target="_blank">
+        <img src="static/img/engine oil.jpeg" alt="Engine Oil Filter">
+      </a>
+      <div class="card-content">
+        <h2>Engine Oil Filter</h2>
+        <p class="price">₹300 – ₹700</p>
+        <p>Brand-specific (Bosch, Mahindra, Maruti)</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <a href="https://www.amazon.in/s?k=car+spear+parts+all" target="_blank">
+        <img src="static/img/spark plug.jpeg" alt="Spark Plugs">
+      </a>
+      <div class="card-content">
+        <h2>Spark Plugs (Set of 4)</h2>
+        <p class="price">₹400 – ₹1,000</p>
+        <p>Depends on car model (NGK, Bosch)</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <a href="https://www.amazon.in/s?k=car+spear+parts+all" target="_blank">
+        <img src="static/img/air filter.jpeg" alt="Air Filter">
+      </a>
+      <div class="card-content">
+        <h2>Air Filter</h2>
+        <p class="price">₹250 – ₹800</p>
+        <p>Foam or paper type, varies per car</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <a href="https://www.amazon.in/s?k=car+spear+parts+all" target="_blank">
+        <img src="static/img/break pad.jpeg" alt="Brake Pads">
+      </a>
+      <div class="card-content">
+        <h2>Brake Pads</h2>
+        <p class="price">₹900 – ₹2,000</p>
+        <p>Disc brake pads (TVS, Bosch, Rane)</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <a href="https://www.amazon.in/s?k=car+spear+parts+all" target="_blank">
+        <img src="static/img/car bettery.jpeg" alt="Car Battery">
+      </a>
+      <div class="card-content">
+        <h2>Car Battery (35-65 Ah)</h2>
+        <p class="price">₹3,000 – ₹7,000</p>
+        <p>Amaron, Exide, Luminous</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <a href="https://www.amazon.in/s?k=car+spear+parts+all" target="_blank">
+        <img src="static/img/OBD2 Bluetooth Scanner.jpeg" alt="OBD2 Scanner">
+      </a>
+      <div class="card-content">
+        <h2>OBD2 Bluetooth Scanner</h2>
+        <p class="price">₹800 – ₹1,500</p>
+        <p>Works with apps like Torque</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <a href="https://www.amazon.in/s?k=car+spear+parts+all" target="_blank">
+        <img src="static/img/Coolant Temperature Sensor.jpeg" alt="Coolant Sensor">
+      </a>
+      <div class="card-content">
+        <h2>Coolant Temperature Sensor</h2>
+        <p class="price">₹350 – ₹900</p>
+        <p>OEM or compatible sensors</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <a href="https://www.amazon.in/s?k=car+spear+parts+all" target="_blank">
+        <img src="static/img/Drive Belt.jpeg" alt="Drive Belt">
+      </a>
+      <div class="card-content">
+        <h2>Serpentine/Drive Belt</h2>
+        <p class="price">₹500 – ₹1,200</p>
+        <p>Rubber/poly-v belts</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <a href="https://www.amazon.in/s?k=car+spear+parts+all" target="_blank">
+        <img src="static/img/Fuel Filter.jpeg" alt="Fuel Filter">
+      </a>
+      <div class="card-content">
+        <h2>Fuel Filter</h2>
+        <p class="price">₹400 – ₹1,000</p>
+        <p>Petrol or diesel-specific</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <a href="https://www.amazon.in/s?k=car+spear+parts+all" target="_blank">
+        <img src="static/img/Engine Mount.jpeg" alt="Engine Mount">
+      </a>
+      <div class="card-content">
+        <h2>Engine Mount</h2>
+        <p class="price">₹900 – ₹2,500</p>
+        <p>Rubber hydraulic or solid mounts</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <a href="https://www.amazon.in/s?k=car+spear+parts+all" target="_blank">
+        <img src="static/img/engine.jpeg" alt="Engine Oil">
+      </a>
+      <div class="card-content">
+        <h2>Engine Oil</h2>
+        <p class="price">₹300 – ₹500</p>
+        <p>Depends on car model (1ltr, 1.5ltr...)</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <a href="https://www.amazon.in/s?k=car+spear+parts+all" target="_blank">
+        <img src="static/img/tyre.jpeg" alt="Tyre">
+      </a>
+      <div class="card-content">
+        <h2>Tyre</h2>
+        <p class="price">₹2,500 – ₹3,500</p>
+        <p>Rubber casings for wheel rims</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2025 CarBot.
+  </footer>
+</body>
+</html>

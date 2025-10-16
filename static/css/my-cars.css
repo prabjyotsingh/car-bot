@@ -1,0 +1,538 @@
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background-color: #111;
+  color: #fff;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 220px;
+  background: #1c1c1c;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.5rem;
+  color: #a5d610;
+  margin-bottom: 30px;
+}
+
+.nav-link {
+  padding: 10px 0;
+  color: #ccc;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: #a5d610;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.top-bar h1 {
+  font-size: 2rem;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.add-btn {
+  padding: 10px 20px;
+  background: #a5d610;
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.add-btn:hover {
+  background: #c0ef2b;
+}
+
+.content {
+  flex: 1;
+}
+
+.cars-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.car-card {
+  background: #222;
+  padding: 20px;
+  border-radius: 10px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.car-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background: #a5d610;
+}
+
+.car-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.car-card h3 {
+  color: #a5d610;
+  margin-top: 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.car-badge {
+  font-size: 0.8rem;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: #3a4d00;
+  color: #fff;
+}
+
+.car-detail {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  color: #ccc;
+}
+
+.car-detail-label {
+  font-weight: bold;
+  color: #fff;
+}
+
+.car-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.car-btn {
+  padding: 5px 10px;
+  background: transparent;
+  border: 1px solid #a5d610;
+  color: #a5d610;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.car-btn:hover {
+  background: #a5d610;
+  color: #000;
+}
+
+.loading-message {
+  text-align: center;
+  padding: 40px;
+  font-style: italic;
+  color: #999;
+}
+
+.no-cars-message {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #1c1c1c;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  background: #252525;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #a5d610;
+  font-size: 1.3rem;
+}
+
+.close-modal {
+  color: #999;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.close-modal:hover {
+  color: #fff;
+}
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: #ccc;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%;
+  padding: 10px;
+  background: #333;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-family: 'Roboto', sans-serif;
+}
+
+.form-group textarea {
+  height: 100px;
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.cancel-btn {
+  padding: 10px 20px;
+  background: transparent;
+  border: 1px solid #ccc;
+  color: #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.submit-btn {
+  padding: 10px 20px;
+  background: #a5d610;
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.cancel-btn:hover {
+  background: #333;
+  color: #fff;
+}
+
+.submit-btn:hover {
+  background: #c0ef2b;
+}
+
+/* Car details styles */
+.car-details-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.car-details-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.car-icon {
+  font-size: 2rem;
+  color: #a5d610;
+}
+
+.car-details-title {
+  margin: 0;
+  color: #a5d610;
+}
+
+.car-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px 30px;
+}
+
+.car-info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.car-info-label {
+  font-size: 0.9rem;
+  color: #999;
+}
+
+.car-info-value {
+  font-weight: bold;
+  color: #fff;
+}
+
+.car-details-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.chatbox {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 300px;
+  background: #222;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 0 10px #a5d610;
+  z-index: 99;
+}
+
+.chat-header {
+  background: #3a4d00;
+  color: white;
+  padding: 10px;
+  font-weight: bold;
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  max-height: 200px;
+}
+
+.chat-input {
+  display: flex;
+  border-top: 1px solid #444;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 10px;
+  background: #111;
+  color: white;
+  border: none;
+}
+
+.chat-input button {
+  padding: 10px;
+  background: #a5d610;
+  color: black;
+  border: none;
+  cursor: pointer;
+}
+
+/* Health check animation and results */
+.health-check-container {
+  margin-top: 15px;
+  border-top: 1px dashed #444;
+  padding-top: 15px;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none; /* Disable interaction when hidden */
+  transform: translateY(-10px);
+  transition: 
+    max-height 0.4s cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity 0.4s cubic-bezier(0.22, 0.61, 0.36, 1),
+    visibility 0.4s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+  position: relative;
+}
+
+.health-check-container.visible {
+  max-height: 300px;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all; /* Enable interaction when visible */
+  transform: translateY(0);
+}
+
+.health-check-animation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60px;
+  margin-bottom: 15px;
+}
+
+.health-check-results {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  padding: 15px;
+  display: none; /* Hidden by default */
+}
+
+.scanning-pulse {
+  width: 60px;
+  height: 60px;
+  background-color: rgba(165, 214, 16, 0.3);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.scanning-pulse::before {
+  content: "🔍";
+  font-size: 24px;
+}
+
+.scanning-pulse::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(165, 214, 16, 0.3);
+  border-radius: 50%;
+  z-index: -1;
+  animation: pulse-ring 1.5s ease-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+  }
+  70% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(0.95);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.8;
+  }
+  80%, 100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+.health-meter {
+  height: 8px;
+  background: #333;
+  border-radius: 4px;
+  margin-top: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.health-meter-fill {
+  height: 100%;
+  background: #a5d610;
+  width: 0;
+  transition: width 1.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+  border-radius: 4px;
+}
+
+.health-meter-fill.warning {
+  background: #f0ad4e;
+}
+
+.health-meter-fill.danger {
+  background: #d9534f;
+}
+
+.health-check-message {
+  margin-top: 10px;
+  font-style: italic;
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+.health-check-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.health-check-status strong {
+  font-size: 1.1rem;
+}
+
+.health-check-close {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 20px;
+  height: 20px;
+  background: rgba(0,0,0,0.5);
+  color: #ccc;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.health-check-close:hover {
+  background: rgba(0,0,0,0.8);
+  color: white;
+} 

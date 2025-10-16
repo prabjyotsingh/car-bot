@@ -1,0 +1,153 @@
+
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background-color: #111;
+  color: #fff;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 220px;
+  background: #1c1c1c;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.5rem;
+  color: #a5d610;
+  margin-bottom: 30px;
+}
+
+.nav-link {
+  padding: 10px 0;
+  color: #ccc;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.nav-link:hover {
+  color: #fff;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.top-bar h1 {
+  font-size: 2rem;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.content {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+}
+
+.form-section, .prediction-section {
+  background: #222;
+  padding: 20px;
+  border-radius: 10px;
+  flex: 1;
+}
+
+.form-section h3, .prediction-section h3 {
+  color: #a5d610;
+  margin-bottom: 15px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+input, select {
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  background: #333;
+  color: #fff;
+}
+
+button {
+  padding: 10px 20px;
+  background: #a5d610;
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #c0ef2b;
+}
+
+.chatbox {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 300px;
+  background: #222;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 0 10px #a5d610;
+}
+
+.chat-header {
+  background: #3a4d00;
+  color: white;
+  padding: 10px;
+  font-weight: bold;
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  max-height: 200px;
+}
+
+.chat-input {
+  display: flex;
+  border-top: 1px solid #444;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 10px;
+  background: #111;
+  color: white;
+  border: none;
+}
+
+.chat-input button {
+  padding: 10px;
+  background: #a5d610;
+  color: black;
+  border: none;
+  cursor: pointer;
+}
+

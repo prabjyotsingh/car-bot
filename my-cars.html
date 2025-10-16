@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Cars - CarBot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="static/css/my-cars.css">
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>CarBot</h2>
+    <a class="nav-link" href="dashboard.html">Dashboard</a>
+    <a class="nav-link active" href="my-cars.html">My Cars</a>
+    <a class="nav-link" href="models.html">AI Models</a>
+    <a class="nav-link" href="workshop.html">Workshops</a>
+    <a class="nav-link" href="product.html">Products</a>
+    <a class="nav-link" href="login.html">Login</a>
+  </div>
+  <div class="main">
+    <div class="top-bar">
+      <h1>My Cars</h1>
+      <button id="addNewCarBtn" class="add-btn">+ Add New Car</button>
+    </div>
+    <div class="content">
+      <div class="cars-container" id="carsContainer">
+        <div class="loading-message">Loading your vehicles...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Car Modal -->
+  <div class="modal" id="addCarModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add New Car</h2>
+        <span class="close-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <form id="addCarForm">
+          <div class="form-group">
+            <label for="carMake">Make</label>
+            <input type="text" id="carMake" required placeholder="e.g. Toyota" />
+          </div>
+          <div class="form-group">
+            <label for="carModel">Model</label>
+            <input type="text" id="carModel" required placeholder="e.g. Camry" />
+          </div>
+          <div class="form-group">
+            <label for="carYear">Year</label>
+            <input type="number" id="carYear" required placeholder="e.g. 2020" min="1900" max="2030" />
+          </div>
+          <div class="form-group">
+            <label for="carMileage">Current Mileage</label>
+            <input type="number" id="carMileage" required placeholder="e.g. 25000" min="0" />
+          </div>
+          <div class="form-group">
+            <label for="carEngine">Engine Type</label>
+            <select id="carEngine" required>
+              <option value="">Select engine type</option>
+              <option value="Petrol">Petrol</option>
+              <option value="Diesel">Diesel</option>
+              <option value="Hybrid">Hybrid</option>
+              <option value="Electric">Electric</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="carColor">Color</label>
+            <input type="text" id="carColor" placeholder="e.g. Silver" />
+          </div>
+          <div class="form-group">
+            <label for="carNotes">Notes</label>
+            <textarea id="carNotes" placeholder="Any additional information about your car"></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="cancel-btn">Cancel</button>
+            <button type="submit" class="submit-btn">Add Car</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Car Details Modal -->
+  <div class="modal" id="carDetailsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="carDetailsTitle">Car Details</h2>
+        <span class="close-modal">&times;</span>
+      </div>
+      <div class="modal-body" id="carDetailsBody">
+        <div class="loading-message">Loading car details...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chatbot -->
+  <div class="chatbox">
+    <div class="chat-header">CarBot Assistant</div>
+    <div class="chat-messages" id="chatMessages">
+      <div><strong>CarBot:</strong> Need help with your cars? Ask me anything!</div>
+    </div>
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="Ask something...">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script src="static/js/my-cars.js"></script>    
+</body>
+</html> 

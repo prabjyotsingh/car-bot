@@ -1,0 +1,104 @@
+{
+  "models": {
+    "engine_health_model": {
+      "name": "Engine Health Prediction Model",
+      "file": "models/engine_health_model.h5",
+      "version": "1.0.0",
+      "created_at": "2025-05-01",
+      "description": "Neural network model for predicting engine health based on car metrics",
+      "input_features": [
+        {
+          "name": "mileage",
+          "description": "Vehicle mileage (normalized to 0-1 range)",
+          "normalization": "Value divided by 200,000"
+        },
+        {
+          "name": "rpm",
+          "description": "Engine RPM (normalized to 0-1 range)",
+          "normalization": "Value divided by 5,000"
+        },
+        {
+          "name": "temperature",
+          "description": "Engine temperature in Fahrenheit (normalized to 0-1 range)",
+          "normalization": "Value divided by 250"
+        },
+        {
+          "name": "oil_level",
+          "description": "Oil level percentage (0-1 range)",
+          "normalization": "Already in 0-1 range"
+        }
+      ],
+      "output": {
+        "type": "Binary classification",
+        "values": {
+          "0": "Needs maintenance",
+          "1": "Good condition"
+        },
+        "confidence": "Model output probability"
+      },
+      "architecture": {
+        "type": "Sequential",
+        "layers": [
+          "Normalization",
+          "Dense(32) with ReLU + L2 regularization",
+          "Dropout(0.2)",
+          "Dense(16) with ReLU + L2 regularization",
+          "Dropout(0.2)",
+          "Dense(1) with Sigmoid activation"
+        ]
+      },
+      "training": {
+        "dataset_size": 1000,
+        "epochs": 10,
+        "batch_size": 32,
+        "validation_split": 0.2
+      }
+    },
+    "chatbot_model": {
+      "name": "Car Assistant Chatbot Model",
+      "file": "models/chatbot_model.h5",
+      "version": "1.0.0",
+      "created_at": "2025-05-01",
+      "description": "NLP model for understanding car-related queries and providing assistance",
+      "input_features": {
+        "type": "Text tokens",
+        "max_length": 20,
+        "vocabulary_size": 30
+      },
+      "output": {
+        "type": "Multi-class classification",
+        "classes": 25,
+        "intents": [
+          "Engine issues", "Oil change", "Tire pressure",
+          "Brake problems", "Transmission", "General car questions",
+          "Vehicle maintenance", "Problem diagnosis", "Issue identification",
+          "Help request", "Repair questions", "Repair recommendations",
+          "Maintenance questions", "Service intervals", "System checks",
+          "How-to questions", "What-is questions", "When-to-service",
+          "Why problems occur", "Where to service", "Overheating",
+          "Noise diagnosis", "Fluid leaks", "Warning signs",
+          "Dashboard warning lights"
+        ]
+      },
+      "architecture": {
+        "type": "Sequential",
+        "layers": [
+          "Embedding(30, 32, input_length=20)",
+          "Bidirectional LSTM(32, return_sequences=True)",
+          "Dropout(0.2)",
+          "GlobalAveragePooling1D",
+          "Dense(64) with ReLU",
+          "Dropout(0.3)",
+          "Dense(32) with ReLU",
+          "Dense(25) with Softmax activation"
+        ]
+      },
+      "training": {
+        "dataset_size": 500,
+        "epochs": 15,
+        "batch_size": 32,
+        "validation_split": 0.2
+      }
+    }
+  }
+} 

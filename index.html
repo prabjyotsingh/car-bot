@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CarBot - Smart Auto Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="static/css/index.css">
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <!-- NAVIGATION -->
+  <nav role="navigation" aria-label="Main Navigation">
+    <h1>🚗 CarBot</h1>
+    <div class="nav-links">
+      <a href="index.html" class="active">Home</a>
+      <a href="#features">Features</a>
+      <a href="dashboard.html" class="highlight-link">Dashboard</a>
+      <a href="my-cars.html">My Cars</a>
+      <a href="models.html">AI Models</a>
+      <a href="product.html">Products</a>
+      <a href="workshop.html">Workshops</a>
+      <a href="login.html">Login</a>
+    </div>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <video autoplay muted loop playsinline class="hero-video">
+      <source src="WhatsApp Video 2025-05-01 at 15.13.21_a0ea6f98.mp4" type="video/mp4">
+      Your browser does not support HTML5 video.
+    </video>
+    <div class="hero-overlay">
+      <h1 class="hero-title">CarBot</h1>
+      <p class="hero-subtitle">Smart Auto Assistant for the Future of Driving</p>
+      <div class="hero-buttons">
+        <a href="dashboard.html" class="hero-cta primary">Go to Dashboard</a>
+        <a href="#features" class="hero-cta secondary">Explore Features</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUOTE -->
+  <div class="quote">
+    <p>"Cars aren't just machines, they're freedom. <strong>CarBot</strong> keeps yours alive and well."</p>
+  </div>
+
+  <!-- FEATURES -->
+  <section class="features-section">
+    <h2 class="section-title">Our Features</h2>
+    <div class="features" id="features">
+      <div class="feature">
+        <div class="feature-icon">🔍</div>
+        <h3>Engine Prediction</h3>
+        <p>AI diagnostics to detect engine issues early and avoid costly repairs.</p>
+        <a href="dashboard.html" class="feature-link">Try Now</a>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🛠️</div>
+        <h3>Nearest Workshop</h3>
+        <p>Live workshop locator with distance, reviews, and instant navigation.</p>
+        <a href="/workshop" class="feature-link">Find Workshops</a>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🚗</div>
+        <h3>Car Management</h3>
+        <p>Keep track of all your vehicles in one place with our easy-to-use interface.</p>
+        <a href="my-cars.html" class="feature-link">Manage Cars</a>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">💬</div>
+        <h3>Chatbot Assistant</h3>
+        <p>24/7 smart assistant for all your car-related queries.</p>
+        <a href="#" class="feature-link" onclick="toggleChat(); return false;">Chat Now</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CALL TO ACTION -->
+  <section class="cta-section">
+    <div class="cta-content">
+      <h2>Ready to Experience CarBot?</h2>
+      <p>Get started with our dashboard and see how we can help you manage your vehicle's health.</p>
+      <a href="dashboard.html" class="cta-button">Go to Dashboard</a>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="testimonials-section">
+    <h2 class="section-title">What Our Users Say</h2>
+    <div class="testimonials">
+      <div class="testimonial">
+        <div class="testimonial-rating">★★★★★</div>
+        <p>"CarBot alerted me about a coolant leak before it overheated. Amazing!"</p>
+        <div class="testimonial-author">— Ravi T.</div>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-rating">★★★★★</div>
+        <p>"I booked a garage in 3 taps. Saved time and stress!"</p>
+        <div class="testimonial-author">— Amrita S.</div>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-rating">★★★★★</div>
+        <p>"The dashboard feature helps me track all my cars in one place. So convenient!"</p>
+        <div class="testimonial-author">— Leo K.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-logo">🚗 CarBot</div>
+      <div class="footer-links">
+        <a href="index.html">Home</a>
+        <a href="#features">Features</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="my-cars.html">My Cars</a>
+        <a href="models.html">AI Models</a>
+        <a href="product.html">Products</a>
+        <a href="workshop.html">Workshops</a>
+        <a href="login.html">Login</a>
+      </div>
+      <div class="footer-copyright">
+        &copy; 2025 CarBot. Built for the future of driving.
+      </div>
+    </div>
+  </footer>
+
+  <!-- CHATBOT -->
+  <button class="chat-toggle" onclick="toggleChat()" aria-label="Open chat">💬</button>
+  <div class="chatbox" id="chatbox" aria-live="polite">
+    <div class="chat-header">CarBot Chat</div>
+    <div class="chat-messages" id="messages">
+      <div><strong>CarBot:</strong> Hello! How can I help with your car today?</div>
+    </div>
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="Ask something..." aria-label="Chat input" />
+      <button onclick="sendChat()">Send</button>
+    </div>
+  </div>
+
+  <script src="static/js/index.js"></script>
+</body>
+</html>
