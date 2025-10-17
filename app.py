@@ -36,15 +36,151 @@ def _load_tf_model():
         return None
 
 
+def _dataset_heuristic_prediction(mileage, rpm, temperature, oil_level):
+    """Enhanced dataset-based heuristic using refined training formula"""
+    # Convert temperature to Fahrenheit to match dataset
+    temp_fahrenheit = (temperature * 9/5) + 32
+    
+    # Normalize inputs exactly as in dataset
+    normalized_mileage = min(1.0, mileage / 200000.0)
+    normalized_rpm = max(0.0, min(1.0, rpm / 5000.0))
+    normalized_temp = max(0.0, min(1.0, temp_fahrenheit / 250.0))
+    normalized_oil = max(0.2, min(1.0, oil_level / 100.0))
+    
+    # Enhanced dataset formula with more precise weights
+    health = 1.0  # Start with perfect health
+    
+    # Mileage impact (0-0.35) - refined weight
+    health -= normalized_mileage * 0.35
+    
+    # RPM impact - more precise optimal range
+    # Optimal RPM around 2000-2500 (0.4-0.5 normalized)
+    optimal_rpm = 0.45  # Slightly below 0.5 for better real-world performance
+    rpm_deviation = abs(normalized_rpm - optimal_rpm)
+    health -= rpm_deviation * 0.5  # Increased sensitivity to RPM deviation
+    
+    # Temperature impact - more realistic thresholds
+    # Critical threshold at 180°F (0.72 normalized) instead of 150°F
+    temp_critical = 0.72
+    if normalized_temp > temp_critical:
+        temp_impact = (normalized_temp - temp_critical) * 0.6
+        health -= temp_impact
+    elif normalized_temp < 0.4:  # Too cold (100°F)
+        health -= 0.1
+    
+    # Oil level impact - more realistic curve
+    if normalized_oil < 0.3:  # Below 30%
+        oil_impact = (0.3 - normalized_oil) * 0.8  # Severe penalty
+        health -= oil_impact
+    elif normalized_oil < 0.5:  # 30-50%
+        oil_impact = (0.5 - normalized_oil) * 0.3  # Moderate penalty
+        health -= oil_impact
+    
+    # Cross-factor penalties for dangerous combinations
+    # High RPM + High Temperature
+    if normalized_rpm > 0.6 and normalized_temp > 0.6:
+        health -= 0.15
+    
+    # Low Oil + High Temperature
+    if normalized_oil < 0.4 and normalized_temp > 0.6:
+        health -= 0.12
+    
+    # High Mileage + High Temperature
+    if normalized_mileage > 0.7 and normalized_temp > 0.6:
+        health -= 0.08
+    
+    # Ensure value is between 0 and 1
+    health = max(0, min(1, health))
+    
+    # Convert to 0-100 score with better scaling
+    score = health * 100
+    
+    # More accurate status determination based on dataset patterns
+    if score >= 80:
+        status = 'Good'
+        message = 'Engine is in excellent condition based on dataset analysis.'
+    elif score >= 65:
+        status = 'Good'
+        message = 'Engine is healthy with minor optimizations possible.'
+    elif score >= 45:
+        status = 'Warning'
+        message = 'Engine shows signs of wear - consider maintenance soon.'
+    elif score >= 25:
+        status = 'Warning'
+        message = 'Engine requires attention - schedule service appointment.'
+    else:
+        status = 'Bad'
+        message = 'Engine condition critical - immediate service required.'
+    
+    return status, score, message
+
 def _heuristic_prediction(mileage, rpm, temperature, oil_level):
-    score = 100
-    # mileage intentionally ignored for prediction calibration
-    score -= max(0, (temperature - 90) * 0.5)
-    score -= max(0, (1500 - rpm) * 0.01)
-    score -= max(0, (100 - oil_level) * 0.3)
+    """Enhanced heuristic prediction with more accurate analysis"""
+    score = 100.0
+    
+    # Temperature analysis (most critical factor)
+    if temperature < 80:
+        score -= 5  # Too cold - inefficient operation
+    elif temperature > 95:
+        score -= (temperature - 95) * 2.0  # Overheating penalty
+    elif temperature > 90:
+        score -= (temperature - 90) * 1.0  # Warming up penalty
+    
+    # RPM analysis (optimal range 1000-3000)
+    if rpm < 800:
+        score -= 15  # Too low - stalling risk
+    elif rpm > 4000:
+        score -= (rpm - 4000) * 0.02  # High RPM stress
+    elif rpm < 1000 or rpm > 3000:
+        score -= 5  # Outside optimal range
+    
+    # Oil level analysis
+    if oil_level < 20:
+        score -= 30  # Critical oil level
+    elif oil_level < 50:
+        score -= (50 - oil_level) * 0.5  # Low oil penalty
+    elif oil_level > 95:
+        score -= 5  # Overfilled
+    
+    # Mileage analysis (wear factor)
+    if mileage > 150000:
+        score -= (mileage - 150000) * 0.0001  # High mileage wear
+    elif mileage > 100000:
+        score -= (mileage - 100000) * 0.00005  # Moderate mileage wear
+    
+    # Cross-factor analysis
+    # High RPM + High Temperature = dangerous combination
+    if rpm > 3000 and temperature > 90:
+        score -= 10
+    
+    # Low oil + High temperature = engine damage risk
+    if oil_level < 30 and temperature > 85:
+        score -= 15
+    
+    # High mileage + High temperature = aging engine stress
+    if mileage > 100000 and temperature > 90:
+        score -= 8
+    
+    # Ensure score stays within bounds
     score = max(0, min(100, score))
-    status = 'Good' if score >= 70 else ('Warning' if score >= 40 else 'Bad')
-    message = 'Engine looks healthy.' if status == 'Good' else ('Consider a check-up soon.' if status == 'Warning' else 'Service recommended.')
+    
+    # Enhanced status determination
+    if score >= 80:
+        status = 'Good'
+        message = 'Engine is in excellent condition. All systems operating normally.'
+    elif score >= 60:
+        status = 'Good'
+        message = 'Engine is healthy with minor optimizations possible.'
+    elif score >= 45:
+        status = 'Warning'
+        message = 'Engine shows signs of stress. Consider maintenance soon.'
+    elif score >= 25:
+        status = 'Warning'
+        message = 'Engine requires attention. Schedule service appointment.'
+    else:
+        status = 'Bad'
+        message = 'Engine condition critical. Immediate service required.'
+    
     return status, score, message
 
 # API: Model info
@@ -60,22 +196,61 @@ def get_model_info():
     except Exception as e:
         return jsonify({"error": f"Failed to read model info: {e}"}), 500
 
-# API: Chatbot
+# API: Enhanced Chatbot based on dataset patterns
 @app.post('/chatbot')
 def chatbot_reply():
     try:
         payload = request.get_json(force=True) or {}
         message = (payload.get('message') or '').lower()
+        
         def get_reply(msg: str) -> str:
-            if 'engine' in msg:
-                return "I'm running diagnostics on your engine now."
-            if 'workshop' in msg:
-                return "Nearest workshop is 2km away. Want directions?"
-            if 'product' in msg:
-                return "You can browse oils, filters, and cleaning kits!"
-            if 'hi' in msg or 'hello' in msg:
-                return "Hey there! CarBot here — what can I help you with?"
-            return "Hmm, I'm still learning! Try asking about your engine, a product, or a mechanic."
+            # Engine health related queries
+            if any(word in msg for word in ['engine', 'motor', 'health', 'diagnostic', 'check']):
+                return "I can analyze your engine health! Enter your RPM (500-5000), temperature (60-120°C), oil level (20-100%), and mileage (0-200k km) in the dashboard for a comprehensive analysis based on our dataset patterns."
+            
+            # RPM related queries
+            if any(word in msg for word in ['rpm', 'revolution', 'speed', 'idle', 'rev']):
+                return "RPM analysis: Optimal range is 2000-2500 RPM. Below 1000 RPM may indicate stalling issues, above 4000 RPM causes engine stress. Our dataset shows engines perform best around 2250 RPM."
+            
+            # Temperature related queries
+            if any(word in msg for word in ['temperature', 'temp', 'hot', 'overheat', 'cooling']):
+                return "Temperature guidance: Normal operating range is 80-95°C (176-203°F). Critical threshold is 105°C (221°F). Our dataset indicates engines above 180°F show significant wear patterns."
+            
+            # Oil related queries
+            if any(word in msg for word in ['oil', 'lubrication', 'level', 'change']):
+                return "Oil level analysis: Maintain 80-100% for optimal performance. Below 30% is critical, 30-50% requires attention. Our dataset shows severe penalties for oil levels below 30%."
+            
+            # Mileage related queries
+            if any(word in msg for word in ['mileage', 'kilometers', 'km', 'distance', 'odometer']):
+                return "Mileage insights: Our dataset covers 0-200,000 km range. High mileage (>150k km) shows increased wear patterns. Linear normalization helps predict maintenance needs."
+            
+            # Maintenance related queries
+            if any(word in msg for word in ['maintenance', 'service', 'repair', 'fix', 'problem']):
+                return "Maintenance recommendations: Based on our dataset analysis, engines scoring below 50% need immediate attention. Cross-factor analysis detects dangerous combinations like high RPM + high temperature."
+            
+            # Workshop related queries
+            if any(word in msg for word in ['workshop', 'mechanic', 'garage', 'service center', 'repair shop']):
+                return "Workshop finder: I can help locate nearby service centers. For critical issues (confidence <30%), seek immediate professional help. Our analysis helps prioritize urgency."
+            
+            # Product related queries
+            if any(word in msg for word in ['product', 'parts', 'oil filter', 'air filter', 'spark plug']):
+                return "Product recommendations: Browse our catalog for engine oils, filters, and maintenance parts. Products are selected based on engine health analysis and dataset patterns."
+            
+            # Dataset related queries
+            if any(word in msg for word in ['dataset', 'data', 'analysis', 'model', 'prediction']):
+                return "Dataset info: Our analysis uses 4 factors - RPM (500-5000), Temperature (60-250°F), Oil Level (20-100%), Mileage (0-200k km). ML model + enhanced heuristic provide accurate predictions."
+            
+            # Greeting queries
+            if any(word in msg for word in ['hi', 'hello', 'hey', 'good morning', 'good afternoon']):
+                return "Hello! I'm CarBot, your AI engine health assistant. I can analyze engine data, provide maintenance advice, and help with car-related questions based on our comprehensive dataset. What would you like to know?"
+            
+            # Help queries
+            if any(word in msg for word in ['help', 'assist', 'support', 'guide']):
+                return "I can help with: Engine health analysis, RPM/temperature/oil guidance, maintenance recommendations, workshop locations, product suggestions, and dataset insights. Just ask!"
+            
+            # Default response with dataset context
+            return "I'm CarBot, specialized in engine health analysis! Ask me about RPM ranges (500-5000), temperature thresholds (60-120°C), oil levels (20-100%), mileage patterns (0-200k km), or maintenance recommendations based on our dataset."
+        
         return jsonify({"reply": get_reply(message)})
     except Exception as e:
         return jsonify({"error": f"Failed to process message: {e}"}), 400
@@ -181,38 +356,102 @@ def predict_engine_health():
         model = _load_tf_model()
         if model is not None:
             import numpy as np
-            # Model from model_regenerator expects 4 normalized features in [0,1]
-            x = np.array([
-                [
-                    0.2,                                       # normalized_mileage (neutral placeholder)
-                    max(0.0, min(1.0, rpm / 5000.0)),          # rpm_ratio
-                    max(0.0, min(1.0, temperature / 250.0)),   # engine_temp_ratio
-                    max(0.2, min(1.0, oil_level / 100.0)),     # oil_level_ratio (min 0.2 per generator)
-                ]
-            ], dtype=np.float32)
+            # Use EXACT dataset normalization as per training data
+            # Dataset was trained with these exact ranges and normalization
+            
+            # Mileage: 0-200,000 km -> 0-1 (linear normalization as in training)
+            normalized_mileage = min(1.0, mileage / 200000.0)
+            
+            # RPM: 500-5000 -> 0-1 (exact training range)
+            normalized_rpm = max(0.0, min(1.0, rpm / 5000.0))
+            
+            # Temperature: 60-250°F -> 0-1 (original training was in Fahrenheit)
+            # Convert Celsius to Fahrenheit for dataset compatibility
+            temp_fahrenheit = (temperature * 9/5) + 32
+            normalized_temp = max(0.0, min(1.0, temp_fahrenheit / 250.0))
+            
+            # Oil level: 20%-100% -> 0-1 (minimum 20% as per training data)
+            normalized_oil = max(0.2, min(1.0, oil_level / 100.0))
+            
+            x = np.array([[
+                normalized_mileage,
+                normalized_rpm,
+                normalized_temp,
+                normalized_oil
+            ]], dtype=np.float32)
+            
             try:
                 prob_good = float(model.predict(x, verbose=0)[0][0])  # 0..1
-                # Heuristic into 0..1 (convert 0..100 score)
-                h_status, h_score, _ = _heuristic_prediction(mileage, rpm, temperature, oil_level)
+                
+                # Use dataset-based heuristic (matching training formula)
+                h_status, h_score, h_message = _dataset_heuristic_prediction(mileage, rpm, temperature, oil_level)
                 h_prob_good = h_score / 100.0
-                # Simple fusion (weighted average)
-                fused_good = 0.6 * prob_good + 0.4 * h_prob_good
-
+                
+                # Intelligent fusion based on model confidence and input quality
+                ml_confidence = abs(prob_good - 0.5) * 2  # 0-1 scale
+                
+                # Adjust weights based on input ranges and model confidence
+                if normalized_mileage > 0.8 or normalized_temp > 0.8 or normalized_oil < 0.3:
+                    # Extreme values - trust heuristic more
+                    ml_weight = 0.3
+                    heuristic_weight = 0.7
+                elif ml_confidence > 0.7:
+                    # High model confidence - trust model more
+                    ml_weight = 0.7
+                    heuristic_weight = 0.3
+                else:
+                    # Balanced approach
+                    ml_weight = 0.5
+                    heuristic_weight = 0.5
+                
+                fused_good = ml_weight * prob_good + heuristic_weight * h_prob_good
+                
+                # Convert to percentage with calibration
                 confidence = max(0.0, min(100.0, fused_good * 100.0))
-                # Calibrated thresholds
-                status = 'Good' if confidence >= 65 else ('Warning' if confidence >= 35 else 'Bad')
-                message = 'Engine looks healthy.' if status == 'Good' else ('Consider a check-up soon.' if status == 'Warning' else 'Service recommended.')
+                
+                # Enhanced status determination with more accurate thresholds
+                if confidence >= 80:
+                    status = 'Good'
+                    message = 'Engine is in excellent condition based on comprehensive analysis.'
+                elif confidence >= 65:
+                    status = 'Good'
+                    message = 'Engine is healthy with minor optimizations possible.'
+                elif confidence >= 50:
+                    status = 'Warning'
+                    message = 'Engine shows signs of wear - consider maintenance soon.'
+                elif confidence >= 30:
+                    status = 'Warning'
+                    message = 'Engine requires attention - schedule service appointment.'
+                elif confidence >= 15:
+                    status = 'Bad'
+                    message = 'Engine condition poor - immediate inspection recommended.'
+                else:
+                    status = 'Bad'
+                    message = 'Engine condition critical - emergency service required.'
+                
                 return jsonify({
                     "status": status,
                     "confidence": confidence,
                     "message": message,
-                    "source": "model+heuristic",
+                    "source": "enhanced_dataset_analysis",
                     "details": {
                         "model_prob_good": round(prob_good, 4),
-                        "heuristic_prob_good": round(h_prob_good, 4)
+                        "heuristic_prob_good": round(h_prob_good, 4),
+                        "ml_weight": round(ml_weight, 3),
+                        "heuristic_weight": round(heuristic_weight, 3),
+                        "ml_confidence": round(ml_confidence, 3),
+                        "dataset_normalized_inputs": {
+                            "mileage": round(normalized_mileage, 3),
+                            "rpm": round(normalized_rpm, 3),
+                            "temperature_f": round(temp_fahrenheit, 1),
+                            "temperature_normalized": round(normalized_temp, 3),
+                            "oil_level": round(normalized_oil, 3)
+                        }
                     }
                 })
-            except Exception:
+            except Exception as e:
+                # Log the error for debugging
+                print(f"ML model prediction error: {e}")
                 pass
 
         # Fallback heuristic
@@ -250,4 +489,5 @@ for route, html_file in ROUTES.items():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    # Disable debug and reloader to avoid conflicts with TensorFlow file watching
+    app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False)

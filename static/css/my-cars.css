@@ -8,6 +8,93 @@ body {
   overflow: hidden;
 }
 
+/* Mobile Responsive Design */
+@media (max-width: 768px) {
+  body {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+  
+  /* Mobile Sidebar */
+  .sidebar {
+    width: 100%;
+    padding: 15px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    order: 2;
+  }
+  
+  .sidebar h2 {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+  }
+  
+  .nav-link {
+    padding: 8px 12px;
+    margin: 2px;
+    background: #333;
+    border-radius: 4px;
+    text-align: center;
+    min-width: 80px;
+  }
+  
+  /* Mobile Main Content */
+  .main {
+    padding: 15px;
+    order: 1;
+  }
+  
+  /* Mobile Car Cards */
+  .car-card {
+    margin-bottom: 15px;
+    padding: 15px;
+  }
+  
+  .car-card h3 {
+    font-size: 1.2rem;
+  }
+  
+  .car-details {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .car-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .car-actions button {
+    width: 100%;
+    padding: 10px;
+  }
+  
+  /* Mobile Modal */
+  .modal-content {
+    width: 95%;
+    margin: 10px auto;
+    padding: 20px;
+  }
+  
+  .modal-content h2 {
+    font-size: 1.3rem;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group input, .form-group select {
+    padding: 12px;
+    font-size: 16px;
+  }
+}
+
 .sidebar {
   width: 220px;
   background: #1c1c1c;
