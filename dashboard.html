@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CarBot Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/dashboard.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <h2><a href="/" style="color: inherit; text-decoration: none;">CarBot</a></h2>
+    <a class="nav-link" href="/">Home</a>
+    <a class="nav-link" href="/dashboard">Dashboard</a>
+    <a class="nav-link" href="/my-cars.html">My Cars</a>
+    <a class="nav-link" href="/models.html">Models</a>
+    <a class="nav-link" href="/product.html">Products</a>
+    <a class="nav-link" href="/workshop">Workshops</a>
+  </aside>
+
+  <section class="main">
+    <div class="top-bar">
+      <h1>Dashboard</h1>
+      <div></div>
+    </div>
+
+    <div class="content">
+      <div class="form-section">
+        <h3>Add Vehicle</h3>
+        <form id="vehicleForm">
+          <div class="form-group">
+            <label for="carName">Car name</label>
+            <input type="text" id="carName" placeholder="Toyota Corolla" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="engine">Engine</label>
+            <input type="text" id="engine" placeholder="1.8L" required />
+          </div>
+          <div class="form-group">
+            <label for="rpm">Engine RPM</label>
+            <input type="number" id="rpm" placeholder="1200" min="500" max="6000" />
+          </div>
+          <div class="form-group">
+            <label for="temperature">Coolant Temperature (°F)</label>
+            <input type="number" id="temperature" placeholder="85" min="0" max="300" />
+          </div>
+          <div class="form-group">
+            <label for="oilLevel">Oil Level (%)</label>
+            <input type="number" id="oilLevel" placeholder="95" min="0" max="100" />
+          </div>
+          <button type="submit">Add</button>
+        </form>
+      </div>
+
+      <div class="prediction-section">
+        <h3>Engine Health Prediction: <strong>Pending</strong></h3>
+        <p>Submit your vehicle details to get a real-time engine health estimate.</p>
+      </div>
+    </div>
+
+    <div class="chatbox">
+      <div class="chat-header">CarBot Chat</div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input">
+        <input id="chatInput" type="text" placeholder="Type a message and press Enter" />
+        <button type="button" onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

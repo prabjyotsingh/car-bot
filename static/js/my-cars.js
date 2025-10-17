@@ -102,7 +102,7 @@ function initializeUI() {
   
   // Add car form submission
   if (addCarForm) {
-    addCarForm.addEventListener('submit', handleAddCar);
+    addCarForm.addEventListener('submit', handleSaveCar);
   }
   
   // Initialize chat input
@@ -175,10 +175,7 @@ function createCarCard(car) {
       ${car.make} ${car.model} 
       <span class="car-badge">${car.year}</span>
     </h3>
-    <div class="car-detail">
-      <span class="car-detail-label">Mileage:</span>
-      <span>${car.mileage.toLocaleString()} miles</span>
-    </div>
+    
     <div class="car-detail">
       <span class="car-detail-label">Engine:</span>
       <span>${car.engine}</span>
@@ -190,6 +187,7 @@ function createCarCard(car) {
     <div class="car-actions">
       <button class="car-btn view-btn" data-car-id="${car.id}">View Details</button>
       <button class="car-btn predict-btn" data-car-id="${car.id}">Health Check</button>
+      <button class="car-btn edit-btn" data-car-id="${car.id}">Edit Details</button>
     </div>
     
     <!-- Health Check Results Container (Initially Hidden) -->
@@ -220,6 +218,12 @@ function createCarCard(car) {
   card.querySelector('.predict-btn').addEventListener('click', (e) => {
     e.stopPropagation();
     runEngineHealthCheck(car);
+  });
+
+  // Edit details button
+  card.querySelector('.edit-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    openEditCarForm(car);
   });
   
   // Show details when clicking the card
@@ -254,10 +258,7 @@ function showCarDetails(car) {
           <div class="car-info-label">Color</div>
           <div class="car-info-value">${car.color}</div>
         </div>
-        <div class="car-info-item">
-          <div class="car-info-label">Mileage</div>
-          <div class="car-info-value">${car.mileage.toLocaleString()} miles</div>
-        </div>
+        
         <div class="car-info-item">
           <div class="car-info-label">Engine Type</div>
           <div class="car-info-value">${car.engine}</div>
@@ -304,23 +305,44 @@ function showCarDetails(car) {
   modal.style.display = 'flex';
 }
 
-// Handle adding a new car
-function handleAddCar(e) {
+// Open edit form prefilled
+function openEditCarForm(car) {
+  const addCarModal = document.getElementById('addCarModal');
+  addCarModal.style.display = 'flex';
+  document.getElementById('editCarId').value = car.id || '';
+  document.getElementById('carMake').value = car.make || '';
+  document.getElementById('carModel').value = car.model || '';
+  document.getElementById('carYear').value = car.year || '';
+  // mileage removed
+  document.getElementById('carEngine').value = car.engine || '';
+  document.getElementById('carColor').value = car.color || '';
+  document.getElementById('carNotes').value = car.notes || '';
+  document.getElementById('carRpm').value = (typeof car.rpm === 'number' ? car.rpm : 1200);
+  document.getElementById('carTemp').value = (typeof car.temperature === 'number' ? car.temperature : 85);
+  document.getElementById('carOil').value = (typeof car.oil_level === 'number' ? car.oil_level : 95);
+}
+
+// Handle add or update car depending on editCarId presence
+function handleSaveCar(e) {
   e.preventDefault();
-  
+  const editId = document.getElementById('editCarId').value;
   const carData = {
+    id: editId || undefined,
     make: document.getElementById('carMake').value,
     model: document.getElementById('carModel').value,
     year: parseInt(document.getElementById('carYear').value),
-    mileage: parseInt(document.getElementById('carMileage').value),
     engine: document.getElementById('carEngine').value,
     color: document.getElementById('carColor').value,
     notes: document.getElementById('carNotes').value,
-    status: 'Good' // Default status
+    status: 'Good', // Default status
+    rpm: parseFloat(document.getElementById('carRpm').value),
+    temperature: parseFloat(document.getElementById('carTemp').value),
+    oil_level: parseFloat(document.getElementById('carOil').value)
   };
   
+  const url = editId ? '/update-car' : '/add-car';
   // In a real app, this would be an API call
-  fetch('/add-car', {
+  fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -337,19 +359,10 @@ function handleAddCar(e) {
     // Close modal and reload cars
     document.getElementById('addCarModal').style.display = 'none';
     document.getElementById('addCarForm').reset();
+    document.getElementById('editCarId').value = '';
     
-    // Reload the car list - in our demo, we'll just add it to the existing list
-    // with a fake ID
-    carData.id = Date.now().toString();
-    const carsContainer = document.getElementById('carsContainer');
-    const carCard = createCarCard(carData);
-    carsContainer.appendChild(carCard);
-    
-    // Remove "no cars" message if it exists
-    const noCarMessage = document.querySelector('.no-cars-message');
-    if (noCarMessage) {
-      noCarMessage.remove();
-    }
+    // Refresh list from server so edits are reflected
+    loadUserCars();
   })
   .catch(error => {
     console.error('Error adding car:', error);
@@ -363,11 +376,10 @@ function runEngineHealthCheck(car) {
     id: car.id,
     make: car.make,
     model: car.model,
-    mileage: car.mileage,
-    // Add other needed data
-    rpm: 1200, // Sample value
-    temperature: 85, // Sample value
-    oil_level: 95 // Sample value
+    
+    rpm: typeof car.rpm === 'number' ? car.rpm : 1200,
+    temperature: typeof car.temperature === 'number' ? car.temperature : 85,
+    oil_level: typeof car.oil_level === 'number' ? car.oil_level : 95
   };
   
   // First, close any open health check panels

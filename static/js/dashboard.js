@@ -23,48 +23,41 @@ document.addEventListener('DOMContentLoaded', () => {
 function handleVehicleSubmit(e) {
   e.preventDefault();
   const carName = document.getElementById('carName').value;
-  const mileage = document.getElementById('mileage').value;
   const engine = document.getElementById('engine').value;
+  const rpm = document.getElementById('rpm')?.value || '1200';
+  const temperature = document.getElementById('temperature')?.value || '85';
+  const oilLevel = document.getElementById('oilLevel')?.value || '95';
 
   fetch('/add-vehicle', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ carName, mileage, engine })
   })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    return response.json();
-  })
+  .then(res => res.json().catch(() => ({ ok: false, error: 'Invalid JSON' })))
   .then(data => {
+    if (!data.ok) {
+      const reason = data.error || 'Unknown error';
+      alert(`Error adding vehicle: ${reason}`);
+      return;
+    }
+
     alert('Vehicle added successfully!');
     document.getElementById('vehicleForm').reset();
-    
-    // After adding a vehicle, immediately run a prediction with the new data
+
     const vehicleData = {
-      make: carName.split(' ')[0],
-      model: carName.split(' ').slice(1).join(' '),
-      year: 2021,
-      mileage: parseInt(mileage),
-      rpm: 1200,
-      temperature: 85,
-      oil_level: 95
+      rpm: parseFloat(rpm),
+      temperature: parseFloat(temperature),
+      oil_level: parseFloat(oilLevel)
     };
-    
-    // Fetch a prediction with the new car's data
-    fetch('/predict-engine-health', {
+
+    return fetch('/predict-engine-health', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(vehicleData)
     })
     .then(response => response.json())
     .then(predictionData => {
-      // Update the prediction UI with the result
       updatePredictionUI(predictionData);
-    })
-    .catch(error => {
-      console.error('Error fetching prediction:', error);
     });
   })
   .catch(error => {
@@ -107,10 +100,9 @@ function fetchEngineHealth() {
 
   // Get the vehicle data - in a real app, this would be dynamic based on selected vehicle
   const vehicleData = {
-    mileage: document.getElementById('mileage')?.value || 5000,
-    rpm: 1200,
-    temperature: 85,
-    oil_level: 95
+    rpm: document.getElementById('rpm')?.value || 1200,
+    temperature: document.getElementById('temperature')?.value || 85,
+    oil_level: document.getElementById('oilLevel')?.value || 95
   };
 
   fetch('/predict-engine-health', {

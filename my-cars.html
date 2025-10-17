@@ -12,7 +12,7 @@
 </head>
 <body>
   <div class="sidebar">
-    <h2>CarBot</h2>
+    <h2><a href="/" style="color: inherit; text-decoration: none;">CarBot</a></h2>
     <a class="nav-link" href="dashboard.html">Dashboard</a>
     <a class="nav-link active" href="my-cars.html">My Cars</a>
     <a class="nav-link" href="models.html">AI Models</a>
@@ -41,6 +41,7 @@
       </div>
       <div class="modal-body">
         <form id="addCarForm">
+          <input type="hidden" id="editCarId" />
           <div class="form-group">
             <label for="carMake">Make</label>
             <input type="text" id="carMake" required placeholder="e.g. Toyota" />
@@ -53,10 +54,7 @@
             <label for="carYear">Year</label>
             <input type="number" id="carYear" required placeholder="e.g. 2020" min="1900" max="2030" />
           </div>
-          <div class="form-group">
-            <label for="carMileage">Current Mileage</label>
-            <input type="number" id="carMileage" required placeholder="e.g. 25000" min="0" />
-          </div>
+          
           <div class="form-group">
             <label for="carEngine">Engine Type</label>
             <select id="carEngine" required>
@@ -74,6 +72,18 @@
           <div class="form-group">
             <label for="carNotes">Notes</label>
             <textarea id="carNotes" placeholder="Any additional information about your car"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="carRpm">Engine RPM</label>
+            <input type="number" id="carRpm" required placeholder="e.g. 2200" min="500" max="6000" />
+          </div>
+          <div class="form-group">
+            <label for="carTemp">Coolant Temperature (°F)</label>
+            <input type="number" id="carTemp" required placeholder="e.g. 190" min="0" max="300" />
+          </div>
+          <div class="form-group">
+            <label for="carOil">Oil Level (%)</label>
+            <input type="number" id="carOil" required placeholder="e.g. 90" min="0" max="100" />
           </div>
           <div class="form-actions">
             <button type="button" class="cancel-btn">Cancel</button>
