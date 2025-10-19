@@ -5,8 +5,9 @@ body {
   background-color: #111;
   color: #fff;
   display: flex;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* Mobile Responsive Design */
@@ -15,7 +16,8 @@ body {
     flex-direction: column;
     height: auto;
     min-height: 100vh;
-    overflow: visible;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 }
 
@@ -78,6 +80,8 @@ body {
   display: flex;
   flex-direction: column;
   padding: 20px;
+  overflow-y: auto;
+  min-height: 0; /* Allow flex item to shrink */
 }
 
 /* Mobile Main Content */

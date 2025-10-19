@@ -188,6 +188,7 @@ function createCarCard(car) {
       <button class="car-btn view-btn" data-car-id="${car.id}">View Details</button>
       <button class="car-btn predict-btn" data-car-id="${car.id}">Health Check</button>
       <button class="car-btn edit-btn" data-car-id="${car.id}">Edit Details</button>
+      <button class="car-btn delete-btn" data-car-id="${car.id}" style="background: #d9534f; border-color: #d9534f; color: white;">Delete</button>
     </div>
     
     <!-- Health Check Results Container (Initially Hidden) -->
@@ -204,6 +205,12 @@ function createCarCard(car) {
           <div class="health-meter-fill"></div>
         </div>
         <div class="health-check-message"></div>
+        <div class="health-check-details" style="display: none; margin-top: 10px; padding: 10px; background: #2a2a2a; border-radius: 6px; font-size: 0.9em;">
+          <div class="analysis-source" style="color: #a5d610; margin-bottom: 8px;"></div>
+          <div class="ml-details" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;"></div>
+          <div class="normalized-inputs" style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 0.8em; color: #888;"></div>
+        </div>
+        <div class="health-check-warnings" style="display: none; margin-top: 10px; padding: 8px; background: #4a2c00; border-radius: 6px; border-left: 3px solid #FF9800; font-size: 0.8em;"></div>
       </div>
       <div class="health-check-close" onclick="closeHealthCheck('${car.id}', event)">✕</div>
     </div>
@@ -224,6 +231,11 @@ function createCarCard(car) {
   card.querySelector('.edit-btn').addEventListener('click', (e) => {
     e.stopPropagation();
     openEditCarForm(car);
+  });
+  
+  card.querySelector('.delete-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    deleteCar(car);
   });
   
   // Show details when clicking the card
@@ -317,9 +329,10 @@ function openEditCarForm(car) {
   document.getElementById('carEngine').value = car.engine || '';
   document.getElementById('carColor').value = car.color || '';
   document.getElementById('carNotes').value = car.notes || '';
-  document.getElementById('carRpm').value = (typeof car.rpm === 'number' ? car.rpm : 1200);
+  document.getElementById('carMileage').value = (typeof car.mileage === 'number' ? car.mileage : 50000);
+  document.getElementById('carRpm').value = (typeof car.rpm === 'number' ? car.rpm : 2500);
   document.getElementById('carTemp').value = (typeof car.temperature === 'number' ? car.temperature : 85);
-  document.getElementById('carOil').value = (typeof car.oil_level === 'number' ? car.oil_level : 95);
+  document.getElementById('carOil').value = (typeof car.oil_level === 'number' ? car.oil_level : 90);
 }
 
 // Handle add or update car depending on editCarId presence
@@ -335,6 +348,7 @@ function handleSaveCar(e) {
     color: document.getElementById('carColor').value,
     notes: document.getElementById('carNotes').value,
     status: 'Good', // Default status
+    mileage: parseFloat(document.getElementById('carMileage').value),
     rpm: parseFloat(document.getElementById('carRpm').value),
     temperature: parseFloat(document.getElementById('carTemp').value),
     oil_level: parseFloat(document.getElementById('carOil').value)
@@ -370,17 +384,71 @@ function handleSaveCar(e) {
   });
 }
 
+// Input validation function (matching training dataset ranges)
+function validateCarInputs(car) {
+  const errors = [];
+  const warnings = [];
+  
+  // Critical errors (prevent analysis) - matching training data ranges
+  if (car.rpm < 500 || car.rpm > 5000) {
+    errors.push('RPM must be between 500-5000 (training dataset range)');
+  }
+  if (car.temperature < 60 || car.temperature > 150) {
+    errors.push('Temperature must be between 60-150°C (training dataset range)');
+  }
+  if (car.oil_level < 20 || car.oil_level > 100) {
+    errors.push('Oil level must be between 20-100% (training dataset range)');
+  }
+  if (car.mileage < 0 || car.mileage > 200000) {
+    errors.push('Mileage must be between 0-200,000 km (training dataset range)');
+  }
+  
+  // Warnings (allow analysis but flag issues)
+  if (car.rpm < 1000) {
+    warnings.push('RPM is low - engine may be idling or stalling');
+  } else if (car.rpm > 4000) {
+    warnings.push('RPM is high - engine under stress');
+  }
+  
+  if (car.temperature < 70) {
+    warnings.push('Temperature is low - engine may not be warmed up');
+  } else if (car.temperature > 110) {
+    warnings.push('Temperature is very high - overheating risk');
+  }
+  
+  if (car.oil_level < 30) {
+    warnings.push('Oil level is critically low - immediate attention needed');
+  } else if (car.oil_level < 50) {
+    warnings.push('Oil level is low - consider adding oil');
+  }
+  
+  if (car.mileage > 150000) {
+    warnings.push('High mileage vehicle - increased wear expected');
+  }
+  
+  return { errors, warnings };
+}
+
 // Run engine health check
 function runEngineHealthCheck(car) {
   const carData = {
     id: car.id,
     make: car.make,
     model: car.model,
-    
-    rpm: typeof car.rpm === 'number' ? car.rpm : 1200,
+    mileage: typeof car.mileage === 'number' ? car.mileage : 50000,
+    rpm: typeof car.rpm === 'number' ? car.rpm : 2500,
     temperature: typeof car.temperature === 'number' ? car.temperature : 85,
-    oil_level: typeof car.oil_level === 'number' ? car.oil_level : 95
+    oil_level: typeof car.oil_level === 'number' ? car.oil_level : 90
   };
+  
+  // Enhanced input validation
+  const validation = validateCarInputs(carData);
+  
+  // If there are critical errors, show them and don't proceed
+  if (validation.errors.length > 0) {
+    alert(`Input validation errors:\n${validation.errors.join('\n')}\n\nPlease correct these issues before analysis.`);
+    return;
+  }
   
   // First, close any open health check panels
   document.querySelectorAll('.health-check-container.visible').forEach(container => {
@@ -458,6 +526,47 @@ function runEngineHealthCheck(car) {
       // Update message
       const messageEl = resultsPanel.querySelector('.health-check-message');
       messageEl.textContent = data.message;
+      
+      // Show detailed analysis information (like dashboard)
+      const detailsPanel = resultsPanel.querySelector('.health-check-details');
+      const warningsPanel = resultsPanel.querySelector('.health-check-warnings');
+      
+      if (data.details) {
+        detailsPanel.style.display = 'block';
+        
+        // Analysis source
+        const sourceEl = detailsPanel.querySelector('.analysis-source');
+        sourceEl.textContent = `Analysis Source: ${data.source}`;
+        
+        // ML details
+        const mlDetailsEl = detailsPanel.querySelector('.ml-details');
+        mlDetailsEl.innerHTML = `
+          <div><strong>ML Model:</strong> ${(data.details.model_prob_good * 100).toFixed(1)}%</div>
+          <div><strong>Heuristic:</strong> ${(data.details.heuristic_prob_good * 100).toFixed(1)}%</div>
+          <div><strong>ML Weight:</strong> ${(data.details.ml_weight * 100).toFixed(0)}%</div>
+          <div><strong>Heuristic Weight:</strong> ${(data.details.heuristic_weight * 100).toFixed(0)}%</div>
+        `;
+        
+        // Normalized inputs
+        if (data.details.dataset_normalized_inputs) {
+          const inputsEl = detailsPanel.querySelector('.normalized-inputs');
+          inputsEl.innerHTML = `
+            <div>Mileage: ${data.details.dataset_normalized_inputs.mileage}</div>
+            <div>RPM: ${data.details.dataset_normalized_inputs.rpm}</div>
+            <div>Temp (°F): ${data.details.dataset_normalized_inputs.temperature_f}</div>
+            <div>Oil Level: ${data.details.dataset_normalized_inputs.oil_level}</div>
+          `;
+        }
+      }
+      
+      // Show warnings if any
+      if (validation.warnings && validation.warnings.length > 0) {
+        warningsPanel.style.display = 'block';
+        warningsPanel.innerHTML = `
+          <strong style="color: #FF9800;">⚠ Input Warnings:</strong><br>
+          ${validation.warnings.map(warning => `• ${warning}`).join('<br>')}
+        `;
+      }
       
       // Update the car's status if it changed
       if (data.status !== car.status) {
@@ -594,4 +703,126 @@ function sendMessage() {
     messages.innerHTML += `<div><strong>CarBot:</strong> Sorry, I'm having trouble connecting. Please try again later.</div>`;
     messages.scrollTop = messages.scrollHeight;
   });
+}
+
+// Delete car function with confirmation
+function deleteCar(car) {
+  // Show confirmation dialog
+  const confirmed = confirm(`Are you sure you want to delete ${car.make} ${car.model} (${car.year})?\n\nThis action cannot be undone.`);
+  
+  if (!confirmed) {
+    return;
+  }
+  
+  // Show loading state
+  const carCard = document.querySelector(`.car-card[data-car-id="${car.id}"]`);
+  if (carCard) {
+    carCard.style.opacity = '0.5';
+    carCard.style.pointerEvents = 'none';
+  }
+  
+  // Make API call to delete car
+  fetch('/delete-car', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ id: car.id })
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(data => {
+    if (data.success) {
+      // Remove car card from DOM
+      if (carCard) {
+        carCard.remove();
+      }
+      
+      // Show success message
+      showNotification('Car deleted successfully!', 'success');
+      
+      // Check if no cars left
+      const remainingCars = document.querySelectorAll('.car-card');
+      if (remainingCars.length === 0) {
+        const carsContainer = document.getElementById('carsContainer');
+        carsContainer.innerHTML = '<div class="no-cars-message">No cars found. Add your first car to get started!</div>';
+      }
+    } else {
+      throw new Error(data.message || 'Failed to delete car');
+    }
+  })
+  .catch(error => {
+    console.error('Error deleting car:', error);
+    
+    // Reset card state
+    if (carCard) {
+      carCard.style.opacity = '1';
+      carCard.style.pointerEvents = 'auto';
+    }
+    
+    // Show error message
+    showNotification('Error deleting car. Please try again.', 'error');
+  });
+}
+
+// Notification function
+function showNotification(message, type = 'info') {
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = `notification notification-${type}`;
+  notification.textContent = message;
+  
+  // Style the notification
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 6px;
+    color: white;
+    font-weight: bold;
+    z-index: 10000;
+    max-width: 300px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  `;
+  
+  // Set background color based on type
+  switch (type) {
+    case 'success':
+      notification.style.backgroundColor = '#28a745';
+      break;
+    case 'error':
+      notification.style.backgroundColor = '#dc3545';
+      break;
+    case 'warning':
+      notification.style.backgroundColor = '#ffc107';
+      notification.style.color = '#000';
+      break;
+    default:
+      notification.style.backgroundColor = '#17a2b8';
+  }
+  
+  // Add to page
+  document.body.appendChild(notification);
+  
+  // Animate in
+  setTimeout(() => {
+    notification.style.transform = 'translateX(0)';
+  }, 100);
+  
+  // Remove after 3 seconds
+  setTimeout(() => {
+    notification.style.transform = 'translateX(100%)';
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    }, 300);
+  }, 3000);
 } 

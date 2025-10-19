@@ -5,30 +5,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatInput = document.getElementById('chatInput');
     const chatMessages = document.getElementById('chatMessages');
 
-    // Input validation function
+    // Input validation function (matching training dataset ranges)
     function validateInputs(data) {
         const errors = [];
         const warnings = [];
         
-        // Critical errors (prevent analysis)
-        if (data.rpm < 0 || data.rpm > 8000) {
-            errors.push('RPM must be between 0-8000');
+        // Critical errors (prevent analysis) - matching training data ranges
+        if (data.rpm < 500 || data.rpm > 5000) {
+            errors.push('RPM must be between 500-5000 (training dataset range)');
         }
-        if (data.temperature < 0 || data.temperature > 150) {
-            errors.push('Temperature must be between 0-150°C');
+        if (data.temperature < 60 || data.temperature > 150) {
+            errors.push('Temperature must be between 60-150°C (training dataset range)');
         }
-        if (data.oil_level < 0 || data.oil_level > 100) {
-            errors.push('Oil level must be between 0-100%');
+        if (data.oil_level < 20 || data.oil_level > 100) {
+            errors.push('Oil level must be between 20-100% (training dataset range)');
         }
-        if (data.mileage < 0 || data.mileage > 1000000) {
-            errors.push('Mileage must be between 0-1,000,000 km');
+        if (data.mileage < 0 || data.mileage > 200000) {
+            errors.push('Mileage must be between 0-200,000 km (training dataset range)');
         }
         
         // Warnings (allow analysis but flag issues)
-        if (data.rpm < 500) {
-            warnings.push('RPM is very low - engine may be stalling');
-        } else if (data.rpm > 6000) {
-            warnings.push('RPM is very high - engine under extreme stress');
+        if (data.rpm < 1000) {
+            warnings.push('RPM is low - engine may be idling or stalling');
+        } else if (data.rpm > 4000) {
+            warnings.push('RPM is high - engine under stress');
         }
         
         if (data.temperature < 70) {
@@ -37,43 +37,43 @@ document.addEventListener('DOMContentLoaded', function() {
             warnings.push('Temperature is very high - overheating risk');
         }
         
-        if (data.oil_level < 20) {
+        if (data.oil_level < 30) {
             warnings.push('Oil level is critically low - immediate attention needed');
         } else if (data.oil_level < 50) {
             warnings.push('Oil level is low - consider adding oil');
         }
         
-        if (data.mileage > 200000) {
+        if (data.mileage > 150000) {
             warnings.push('High mileage vehicle - increased wear expected');
         }
         
         return { errors, warnings };
     }
 
-    // Quick test scenario function
+    // Quick test scenario function (using training dataset ranges)
     function loadScenario(type) {
         const scenarios = {
             healthy: {
-                rpm: 1200,
+                rpm: 2500,  // Optimal RPM from training data
                 temperature: 85,
-                oil_level: 95,
-                mileage: 45000
+                oil_level: 90,
+                mileage: 50000
             },
             warning: {
-                rpm: 2800,
-                temperature: 98,
-                oil_level: 35,
+                rpm: 2000,
+                temperature: 95,
+                oil_level: 40,
                 mileage: 120000
             },
             critical: {
                 rpm: 3500,
-                temperature: 110,
+                temperature: 120,
                 oil_level: 25,
                 mileage: 180000
             },
             overheating: {
                 rpm: 4000,
-                temperature: 115,
+                temperature: 130,
                 oil_level: 60,
                 mileage: 95000
             }

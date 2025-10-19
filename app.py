@@ -37,65 +37,51 @@ def _load_tf_model():
 
 
 def _dataset_heuristic_prediction(mileage, rpm, temperature, oil_level):
-    """Enhanced dataset-based heuristic using refined training formula"""
-    # Convert temperature to Fahrenheit to match dataset
+    """Dataset-based heuristic that matches the actual training data patterns from model_regenerator.py"""
+    # Input validation and bounds checking (matching training data ranges)
+    mileage = max(0, min(200000, mileage))  # Training data: 0-200,000 km
+    rpm = max(500, min(5000, rpm))  # Training data: 500-5000 RPM
+    temperature = max(60, min(150, temperature))  # Training data: 60-150°C
+    oil_level = max(20, min(100, oil_level))  # Training data: 20-100%
+    
+    # Convert temperature to Fahrenheit for dataset compatibility (training was in Fahrenheit)
     temp_fahrenheit = (temperature * 9/5) + 32
     
-    # Normalize inputs exactly as in dataset
-    normalized_mileage = min(1.0, mileage / 200000.0)
-    normalized_rpm = max(0.0, min(1.0, rpm / 5000.0))
-    normalized_temp = max(0.0, min(1.0, temp_fahrenheit / 250.0))
-    normalized_oil = max(0.2, min(1.0, oil_level / 100.0))
+    # Normalize inputs EXACTLY as in training data
+    normalized_mileage = mileage / 200000.0  # 0-1 range
+    normalized_rpm = rpm / 5000.0  # 0-1 range  
+    normalized_temp = temp_fahrenheit / 250.0  # 0-1 range (60-250°F)
+    normalized_oil = oil_level / 100.0  # 0.2-1.0 range (20-100%)
     
-    # Enhanced dataset formula with more precise weights
+    # Apply the EXACT same formula used in training data generation
     health = 1.0  # Start with perfect health
     
-    # Mileage impact (0-0.35) - refined weight
-    health -= normalized_mileage * 0.35
+    # Mileage impact (0-0.4) - exactly as in training
+    health -= normalized_mileage * 0.4
     
-    # RPM impact - more precise optimal range
-    # Optimal RPM around 2000-2500 (0.4-0.5 normalized)
-    optimal_rpm = 0.45  # Slightly below 0.5 for better real-world performance
-    rpm_deviation = abs(normalized_rpm - optimal_rpm)
-    health -= rpm_deviation * 0.5  # Increased sensitivity to RPM deviation
+    # RPM impact - extreme values are bad (0-0.2) - exactly as in training
+    rpm_impact = abs(normalized_rpm - 0.5) * 0.4  # Optimal RPM around 2500 (0.5 normalized)
+    health -= rpm_impact
     
-    # Temperature impact - more realistic thresholds
-    # Critical threshold at 180°F (0.72 normalized) instead of 150°F
-    temp_critical = 0.72
-    if normalized_temp > temp_critical:
-        temp_impact = (normalized_temp - temp_critical) * 0.6
-        health -= temp_impact
-    elif normalized_temp < 0.4:  # Too cold (100°F)
-        health -= 0.1
+    # Temperature impact - high temps are bad (0-0.2) - exactly as in training
+    temp_impact = max(0, (normalized_temp - 0.6) * 0.5)  # Temps above 150°F (0.6 normalized) are concerning
+    health -= temp_impact
     
-    # Oil level impact - more realistic curve
-    if normalized_oil < 0.3:  # Below 30%
-        oil_impact = (0.3 - normalized_oil) * 0.8  # Severe penalty
-        health -= oil_impact
-    elif normalized_oil < 0.5:  # 30-50%
-        oil_impact = (0.5 - normalized_oil) * 0.3  # Moderate penalty
-        health -= oil_impact
+    # Oil level impact - low oil is bad (0-0.2) - exactly as in training
+    oil_impact = (1 - normalized_oil) * 0.2
+    health -= oil_impact
     
-    # Cross-factor penalties for dangerous combinations
-    # High RPM + High Temperature
-    if normalized_rpm > 0.6 and normalized_temp > 0.6:
-        health -= 0.15
-    
-    # Low Oil + High Temperature
-    if normalized_oil < 0.4 and normalized_temp > 0.6:
-        health -= 0.12
-    
-    # High Mileage + High Temperature
-    if normalized_mileage > 0.7 and normalized_temp > 0.6:
-        health -= 0.08
+    # Add some realistic randomness (matching training data)
+    import random
+    health += random.normalvariate(0, 0.05)
     
     # Ensure value is between 0 and 1
-    health = max(0, min(1, health))
+    health = max(0.0, min(1.0, health))
     
-    # Convert to 0-100 score with better scaling
+    # Convert to percentage
     score = health * 100
     
-    # More accurate status determination based on dataset patterns
+    # Status determination based on training data patterns
     if score >= 80:
         status = 'Good'
         message = 'Engine is in excellent condition based on dataset analysis.'
@@ -115,71 +101,75 @@ def _dataset_heuristic_prediction(mileage, rpm, temperature, oil_level):
     return status, score, message
 
 def _heuristic_prediction(mileage, rpm, temperature, oil_level):
-    """Enhanced heuristic prediction with more accurate analysis"""
-    score = 100.0
+    """Fallback heuristic that closely matches the training data patterns"""
+    # Input validation (matching training data ranges)
+    mileage = max(0, min(200000, mileage))  # Training data: 0-200,000 km
+    rpm = max(500, min(5000, rpm))  # Training data: 500-5000 RPM
+    temperature = max(60, min(150, temperature))  # Training data: 60-150°C
+    oil_level = max(20, min(100, oil_level))  # Training data: 20-100%
     
-    # Temperature analysis (most critical factor)
-    if temperature < 80:
-        score -= 5  # Too cold - inefficient operation
-    elif temperature > 95:
-        score -= (temperature - 95) * 2.0  # Overheating penalty
-    elif temperature > 90:
-        score -= (temperature - 90) * 1.0  # Warming up penalty
+    # Convert temperature to Fahrenheit for consistency
+    temp_fahrenheit = (temperature * 9/5) + 32
     
-    # RPM analysis (optimal range 1000-3000)
-    if rpm < 800:
-        score -= 15  # Too low - stalling risk
-    elif rpm > 4000:
-        score -= (rpm - 4000) * 0.02  # High RPM stress
-    elif rpm < 1000 or rpm > 3000:
-        score -= 5  # Outside optimal range
+    # Normalize inputs as in training data
+    normalized_mileage = mileage / 200000.0
+    normalized_rpm = rpm / 5000.0
+    normalized_temp = temp_fahrenheit / 250.0
+    normalized_oil = oil_level / 100.0
     
-    # Oil level analysis
-    if oil_level < 20:
-        score -= 30  # Critical oil level
-    elif oil_level < 50:
-        score -= (50 - oil_level) * 0.5  # Low oil penalty
-    elif oil_level > 95:
-        score -= 5  # Overfilled
+    # Apply similar logic to training data but with more conservative scoring
+    health = 1.0
     
-    # Mileage analysis (wear factor)
-    if mileage > 150000:
-        score -= (mileage - 150000) * 0.0001  # High mileage wear
-    elif mileage > 100000:
-        score -= (mileage - 100000) * 0.00005  # Moderate mileage wear
+    # Mileage impact (progressive wear)
+    health -= normalized_mileage * 0.35  # Slightly less aggressive than training
     
-    # Cross-factor analysis
-    # High RPM + High Temperature = dangerous combination
-    if rpm > 3000 and temperature > 90:
-        score -= 10
+    # RPM impact (optimal around 2500 RPM)
+    rpm_deviation = abs(normalized_rpm - 0.5)  # 0.5 = 2500 RPM
+    health -= rpm_deviation * 0.3  # Less aggressive than training
     
-    # Low oil + High temperature = engine damage risk
-    if oil_level < 30 and temperature > 85:
-        score -= 15
+    # Temperature impact (critical above 150°F)
+    if normalized_temp > 0.6:  # Above 150°F
+        temp_impact = (normalized_temp - 0.6) * 0.4
+        health -= temp_impact
+    elif normalized_temp < 0.4:  # Below 100°F
+        health -= 0.05  # Slight penalty for too cold
     
-    # High mileage + High temperature = aging engine stress
-    if mileage > 100000 and temperature > 90:
-        score -= 8
+    # Oil level impact
+    oil_impact = (1 - normalized_oil) * 0.15  # Less aggressive than training
+    health -= oil_impact
     
-    # Ensure score stays within bounds
-    score = max(0, min(100, score))
+    # Cross-factor penalties
+    if normalized_rpm > 0.6 and normalized_temp > 0.6:  # High RPM + High temp
+        health -= 0.1
     
-    # Enhanced status determination
+    if normalized_oil < 0.4 and normalized_temp > 0.6:  # Low oil + High temp
+        health -= 0.15
+    
+    if normalized_mileage > 0.7 and normalized_temp > 0.6:  # High mileage + High temp
+        health -= 0.08
+    
+    # Ensure health stays within bounds
+    health = max(0.0, min(1.0, health))
+    
+    # Convert to percentage
+    score = health * 100
+    
+    # Status determination (matching dataset heuristic)
     if score >= 80:
         status = 'Good'
-        message = 'Engine is in excellent condition. All systems operating normally.'
-    elif score >= 60:
+        message = 'Engine is in excellent condition based on comprehensive analysis.'
+    elif score >= 65:
         status = 'Good'
         message = 'Engine is healthy with minor optimizations possible.'
     elif score >= 45:
         status = 'Warning'
-        message = 'Engine shows signs of stress. Consider maintenance soon.'
+        message = 'Engine shows signs of wear - consider maintenance soon.'
     elif score >= 25:
         status = 'Warning'
-        message = 'Engine requires attention. Schedule service appointment.'
+        message = 'Engine requires attention - schedule service appointment.'
     else:
         status = 'Bad'
-        message = 'Engine condition critical. Immediate service required.'
+        message = 'Engine condition critical - immediate service required.'
     
     return status, score, message
 
@@ -343,35 +333,73 @@ def update_car():
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 400
 
+@app.post('/delete-car')
+def delete_car():
+    try:
+        payload = request.get_json(force=True) or {}
+        car_id = str(payload.get('id'))
+        if not car_id:
+            return jsonify({"success": False, "error": "id is required"}), 400
+        
+        # Find and remove the car
+        car_found = False
+        for i, car in enumerate(CARS):
+            if car.get('id') == car_id:
+                deleted_car = CARS.pop(i)
+                car_found = True
+                break
+        
+        if not car_found:
+            return jsonify({"success": False, "error": "car not found"}), 404
+        
+        return jsonify({"success": True, "message": "Car deleted successfully", "deleted_car": deleted_car})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
 @app.post('/predict-engine-health')
 def predict_engine_health():
     try:
         payload = request.get_json(force=True) or {}
-        mileage = float(payload.get('mileage', 5000) or 5000)
-        rpm = float(payload.get('rpm', 1200) or 1200)
-        temperature = float(payload.get('temperature', 85) or 85)
-        oil_level = float(payload.get('oil_level', 95) or 95)
+        
+        # Enhanced input validation with better defaults
+        try:
+            mileage = float(payload.get('mileage', 5000) or 5000)
+            rpm = float(payload.get('rpm', 1200) or 1200)
+            temperature = float(payload.get('temperature', 85) or 85)
+            oil_level = float(payload.get('oil_level', 95) or 95)
+        except (ValueError, TypeError) as e:
+            return jsonify({"error": f"Invalid input values: {e}"}), 400
+        
+        # Validate input ranges (matching training data ranges)
+        if not (0 <= mileage <= 200000):
+            return jsonify({"error": "Mileage must be between 0 and 200,000 km"}), 400
+        if not (500 <= rpm <= 5000):
+            return jsonify({"error": "RPM must be between 500 and 5,000"}), 400
+        if not (60 <= temperature <= 150):
+            return jsonify({"error": "Temperature must be between 60°C and 150°C"}), 400
+        if not (20 <= oil_level <= 100):
+            return jsonify({"error": "Oil level must be between 20% and 100%"}), 400
 
         # Try ML model
         model = _load_tf_model()
         if model is not None:
             import numpy as np
-            # Use EXACT dataset normalization as per training data
+            # Use EXACT dataset normalization as per training data from model_regenerator.py
             # Dataset was trained with these exact ranges and normalization
             
             # Mileage: 0-200,000 km -> 0-1 (linear normalization as in training)
-            normalized_mileage = min(1.0, mileage / 200000.0)
+            normalized_mileage = mileage / 200000.0
             
             # RPM: 500-5000 -> 0-1 (exact training range)
-            normalized_rpm = max(0.0, min(1.0, rpm / 5000.0))
+            normalized_rpm = rpm / 5000.0
             
             # Temperature: 60-250°F -> 0-1 (original training was in Fahrenheit)
             # Convert Celsius to Fahrenheit for dataset compatibility
             temp_fahrenheit = (temperature * 9/5) + 32
-            normalized_temp = max(0.0, min(1.0, temp_fahrenheit / 250.0))
+            normalized_temp = temp_fahrenheit / 250.0
             
-            # Oil level: 20%-100% -> 0-1 (minimum 20% as per training data)
-            normalized_oil = max(0.2, min(1.0, oil_level / 100.0))
+            # Oil level: 20%-100% -> 0.2-1.0 (exact training range)
+            normalized_oil = oil_level / 100.0
             
             x = np.array([[
                 normalized_mileage,
@@ -387,47 +415,59 @@ def predict_engine_health():
                 h_status, h_score, h_message = _dataset_heuristic_prediction(mileage, rpm, temperature, oil_level)
                 h_prob_good = h_score / 100.0
                 
-                # Intelligent fusion based on model confidence and input quality
+                # Improved fusion logic with better confidence assessment
                 ml_confidence = abs(prob_good - 0.5) * 2  # 0-1 scale
                 
-                # Adjust weights based on input ranges and model confidence
-                if normalized_mileage > 0.8 or normalized_temp > 0.8 or normalized_oil < 0.3:
-                    # Extreme values - trust heuristic more
+                # Determine fusion weights based on input characteristics and model confidence
+                extreme_values = (normalized_mileage > 0.8 or normalized_temp > 0.8 or 
+                                normalized_oil < 0.3 or normalized_rpm > 0.8)
+                
+                if extreme_values:
+                    # Extreme values - trust heuristic more (70% heuristic, 30% ML)
                     ml_weight = 0.3
                     heuristic_weight = 0.7
-                elif ml_confidence > 0.7:
-                    # High model confidence - trust model more
-                    ml_weight = 0.7
-                    heuristic_weight = 0.3
+                elif ml_confidence > 0.8 and not extreme_values:
+                    # High model confidence + normal values - trust model more
+                    ml_weight = 0.8
+                    heuristic_weight = 0.2
+                elif ml_confidence > 0.6:
+                    # Moderate confidence - balanced approach
+                    ml_weight = 0.6
+                    heuristic_weight = 0.4
                 else:
-                    # Balanced approach
-                    ml_weight = 0.5
-                    heuristic_weight = 0.5
+                    # Low confidence - trust heuristic more
+                    ml_weight = 0.4
+                    heuristic_weight = 0.6
                 
+                # Weighted fusion with confidence adjustment
                 fused_good = ml_weight * prob_good + heuristic_weight * h_prob_good
+                
+                # Apply confidence scaling to final result
+                confidence_factor = min(1.0, (ml_confidence + 0.5) / 1.5)
+                fused_good = fused_good * confidence_factor + (1 - confidence_factor) * h_prob_good
                 
                 # Convert to percentage with calibration
                 confidence = max(0.0, min(100.0, fused_good * 100.0))
                 
-                # Enhanced status determination with more accurate thresholds
-                if confidence >= 80:
+                # Enhanced status determination with improved thresholds
+                if confidence >= 85:
                     status = 'Good'
-                    message = 'Engine is in excellent condition based on comprehensive analysis.'
-                elif confidence >= 65:
+                    message = 'Engine is in excellent condition. All systems operating optimally.'
+                elif confidence >= 70:
                     status = 'Good'
                     message = 'Engine is healthy with minor optimizations possible.'
-                elif confidence >= 50:
+                elif confidence >= 55:
                     status = 'Warning'
-                    message = 'Engine shows signs of wear - consider maintenance soon.'
-                elif confidence >= 30:
+                    message = 'Engine shows signs of wear. Consider maintenance within 2-3 months.'
+                elif confidence >= 35:
                     status = 'Warning'
-                    message = 'Engine requires attention - schedule service appointment.'
-                elif confidence >= 15:
+                    message = 'Engine requires attention. Schedule service appointment soon.'
+                elif confidence >= 20:
                     status = 'Bad'
-                    message = 'Engine condition poor - immediate inspection recommended.'
+                    message = 'Engine condition poor. Immediate inspection recommended.'
                 else:
                     status = 'Bad'
-                    message = 'Engine condition critical - emergency service required.'
+                    message = 'Engine condition critical. Emergency service required immediately.'
                 
                 return jsonify({
                     "status": status,

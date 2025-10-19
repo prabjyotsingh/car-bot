@@ -4,8 +4,9 @@ body {
   background-color: #111;
   color: #fff;
   display: flex;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* Mobile Responsive Design */
@@ -14,7 +15,8 @@ body {
     flex-direction: column;
     height: auto;
     min-height: 100vh;
-    overflow: visible;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
   
   /* Mobile Sidebar */
@@ -127,6 +129,7 @@ body {
   flex-direction: column;
   padding: 20px;
   overflow-y: auto;
+  min-height: 0; /* Allow flex item to shrink */
 }
 
 .top-bar {
@@ -157,6 +160,8 @@ body {
 
 .content {
   flex: 1;
+  overflow-y: auto;
+  min-height: 0; /* Allow flex item to shrink */
 }
 
 .cars-container {
@@ -237,6 +242,18 @@ body {
 .car-btn:hover {
   background: #a5d610;
   color: #000;
+}
+
+.car-btn.delete-btn {
+  background: #d9534f;
+  border-color: #d9534f;
+  color: white;
+}
+
+.car-btn.delete-btn:hover {
+  background: #c9302c;
+  border-color: #c9302c;
+  color: white;
 }
 
 .loading-message {
@@ -487,7 +504,7 @@ body {
 }
 
 .health-check-container.visible {
-  max-height: 300px;
+  max-height: 500px; /* Increased to accommodate detailed analysis */
   opacity: 1;
   visibility: visible;
   pointer-events: all; /* Enable interaction when visible */
@@ -507,6 +524,8 @@ body {
   border-radius: 6px;
   padding: 15px;
   display: none; /* Hidden by default */
+  overflow-y: auto; /* Allow scrolling within results */
+  max-height: 400px; /* Limit height and allow scrolling */
 }
 
 .scanning-pulse {
