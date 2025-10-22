@@ -115,18 +115,20 @@
     </div>
   </div>
 
-  <!-- Chatbot -->
-  <div class="chatbox">
+  <!-- Chatbot toggle + unified chatbox -->
+  <button class="chat-toggle" onclick="toggleChat()" aria-label="Open chat">💬</button>
+  <div class="chatbox" id="chatbox" aria-live="polite" style="display:none;">
     <div class="chat-header">CarBot Assistant</div>
-    <div class="chat-messages" id="chatMessages">
+    <div class="chat-messages" id="messages">
       <div><strong>CarBot:</strong> Need help with your cars? Ask me anything!</div>
     </div>
     <div class="chat-input">
-      <input type="text" id="chatInput" placeholder="Ask something...">
-      <button onclick="sendMessage()">Send</button>
+      <input type="text" id="chatInput" placeholder="Ask something..." aria-label="Chat input" />
+      <button onclick="sendChat()">Send</button>
     </div>
   </div>
 
-  <script src="static/js/my-cars.js"></script>    
+  <script src="static/js/my-cars.js"></script>
+  <script src="static/js/index.js"></script>    
 </body>
 </html> 

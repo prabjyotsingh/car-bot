@@ -78,25 +78,27 @@
         </div>
     </div>
 
-    <!-- Chatbot -->
-    <div class="chatbox" id="chatbox">
+    <!-- Chatbot toggle + unified chatbox (same as home) -->
+    <button class="chat-toggle" onclick="toggleChat()" aria-label="Open chat">💬</button>
+    <div class="chatbox" id="chatbox" aria-live="polite" style="display:none;">
         <div class="chat-header">CarBot Assistant</div>
-        <div class="chat-messages" id="chatMessages">
+        <div class="chat-messages" id="messages">
             <div class="message" style="background: #444; color: #fff; margin: 5px 0; padding: 8px 12px; border-radius: 8px; max-width: 80%;">
                 Hello! I'm CarBot, your AI engine health assistant. I can help with:
-                <br>• Engine health analysis based on our dataset
-                <br>• RPM, temperature, oil level guidance
-                <br>• Maintenance recommendations
-                <br>• Workshop locations and product suggestions
+                <br> Engine health analysis based on our dataset
+                <br> RPM, temperature, oil level guidance
+                <br> Maintenance recommendations
+                <br> Workshop locations and product suggestions
                 <br><br>Ask me anything about your car!
             </div>
         </div>
         <div class="chat-input">
-            <input type="text" id="chatInput" placeholder="Ask me anything about your car...">
-            <button onclick="sendMessage()">Send</button>
+            <input type="text" id="chatInput" placeholder="Ask me anything about your car..." aria-label="Chat input" />
+            <button onclick="sendChat()">Send</button>
         </div>
     </div>
 
     <script src="/static/js/dashboard.js"></script>
+    <script src="static/js/index.js"></script>
 </body>
 </html>
